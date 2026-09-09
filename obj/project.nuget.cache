@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "dgSpecHash": "U8hSrlZvGkc=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\ПИДОРАС\\source\\repos\\ElementsReport\\ElementsReport\\ElementsReport.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\ПИДОРАС\\.nuget\\packages\\fody\\6.8.1\\fody.6.8.1.nupkg.sha512",
+    "C:\\Users\\ПИДОРАС\\.nuget\\packages\\jetbrains.annotations\\2023.3.0\\jetbrains.annotations.2023.3.0.nupkg.sha512",
+    "C:\\Users\\ПИДОРАС\\.nuget\\packages\\microsoft.xaml.behaviors.wpf\\1.1.77\\microsoft.xaml.behaviors.wpf.1.1.77.nupkg.sha512",
+    "C:\\Users\\ПИДОРАС\\.nuget\\packages\\propertychanged.fody\\4.1.0\\propertychanged.fody.4.1.0.nupkg.sha512"
+  ],
+  "logs": []
+}

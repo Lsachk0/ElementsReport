@@ -1,0 +1,85 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <LangVersion>latest</LangVersion>
+    <PlatformTarget>x64</PlatformTarget>
+    <AssemblyName>ElementsReport</AssemblyName>
+    <RootNamespace>dLab.General.ElementsReport</RootNamespace>
+    <NeutralLanguage>ru</NeutralLanguage>
+
+    <!--
+      Версия Revit задаётся конфигурацией сборки: "Debug R23" собирает под Revit 2023.
+      Перечисление нужно, чтобы среда разработки показала конфигурации в списке.
+    -->
+    <Configurations>Debug R21;Debug R22;Debug R23;Debug R24;Release R21;Release R22;Release R23;Release R24</Configurations>
+  </PropertyGroup>
+
+  <!-- Номер версии выводится из имени выбранной конфигурации -->
+  <PropertyGroup>
+    <RevitVersion Condition="$(Configuration.EndsWith('R21'))">2021</RevitVersion>
+    <RevitVersion Condition="$(Configuration.EndsWith('R22'))">2022</RevitVersion>
+    <RevitVersion Condition="$(Configuration.EndsWith('R23'))">2023</RevitVersion>
+    <RevitVersion Condition="$(Configuration.EndsWith('R24'))">2024</RevitVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(RevitVersion)' != ''">
+    <!--
+      Сборки Revit API лежат в самом репозитории, путь относительный,
+      поэтому проект собирается на любой машине и установленный Revit для сборки не нужен.
+    -->
+    <RevitApiDir>$(MSBuildProjectDirectory)\RevitApi\$(RevitVersion)</RevitApiDir>
+    <RevitAddinsDir>$(AppData)\Autodesk\Revit\Addins\$(RevitVersion)</RevitAddinsDir>
+    <DefineConstants>$(DefineConstants);YEAR$(RevitVersion)</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(RevitVersion)' != ''">
+    <Reference Include="RevitAPI">
+      <HintPath>$(RevitApiDir)\RevitAPI.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="RevitAPIUI">
+      <HintPath>$(RevitApiDir)\RevitAPIUI.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Fody" Version="6.8.1" PrivateAssets="all" />
+    <PackageReference Include="PropertyChanged.Fody" Version="4.1.0" PrivateAssets="all" />
+    <PackageReference Include="JetBrains.Annotations" Version="2023.3.0" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Xaml.Behaviors.Wpf" Version="1.1.77" />
+  </ItemGroup>
+
+  <!--
+    Понятное сообщение вместо простыни ошибок компилятора, если конфигурация
+    выбрана без версии Revit или в репозитории нет сборок нужной версии.
+  -->
+  <Target Name="CheckRevitVersion" BeforeTargets="PrepareForBuild">
+    <Error Condition="'$(RevitVersion)' == ''"
+           Text="Выбрана конфигурация '$(Configuration)', в ней не указана версия Revit. Выберите Debug R21, Debug R22, Debug R23 или Debug R24." />
+    <Error Condition="!Exists('$(RevitApiDir)\RevitAPI.dll')"
+           Text="Не найдены сборки Revit API для версии $(RevitVersion). Ожидались в папке $(RevitApiDir)." />
+  </Target>
+
+  <!--
+    После сборки плагин сам разворачивается в Revit:
+    сборка, символы и сателлитные сборки локализации копируются в подпапку
+    Addins\<версия>\ElementsReport, манифест .addin кладётся рядом с ней.
+    Ссылка на сборку в манифесте относительная, поэтому файл не зависит от машины.
+  -->
+  <Target Name="DeployToRevit" AfterTargets="Build">
+    <ItemGroup>
+      <DeployFiles Include="$(TargetDir)**\*.dll" />
+      <DeployFiles Include="$(TargetDir)$(AssemblyName).pdb" Condition="Exists('$(TargetDir)$(AssemblyName).pdb')" />
+    </ItemGroup>
+    <MakeDir Directories="$(RevitAddinsDir)\$(AssemblyName)" />
+    <Copy SourceFiles="@(DeployFiles)"
+          DestinationFiles="@(DeployFiles->'$(RevitAddinsDir)\$(AssemblyName)\%(RecursiveDir)%(Filename)%(Extension)')" />
+    <Copy SourceFiles="$(MSBuildProjectDirectory)\$(AssemblyName).addin"
+          DestinationFolder="$(RevitAddinsDir)" />
+    <Message Importance="high" Text="Add-in deployed: $(RevitAddinsDir)" />
+  </Target>
+
+</Project>

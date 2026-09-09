@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RevitAddIns>
+  <AddIn Type="Command">
+    <Text>Ведомость элементов</Text>
+    <Description>Список элементов модели с площадями и итогом.</Description>
+    <Assembly>ElementsReport\ElementsReport.dll</Assembly>
+    <AddInId>8f3a1c42-9b57-4f6e-a2d1-5c7e0b934f11</AddInId>
+    <FullClassName>dLab.General.ElementsReport.Command</FullClassName>
+    <VendorId>IND</VendorId>
+    <VendorDescription>IND Architects, dLab</VendorDescription>
+  </AddIn>
+</RevitAddIns>
